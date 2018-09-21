@@ -1,0 +1,10 @@
+---
+- hosts: Docker
+  become: yes
+  become_method: su
+  become_user: root
+  roles:
+    - role: Docker
+  tasks:
+
+
