@@ -7,8 +7,14 @@
 - name: debug
   debug: var=token.token1
 
-- name: Docker swarm join worker
+- name: Swarm leave
   shell: |
-    if [ "$(docker info | grep Swarm | sed 's/Swarm: //g')" == "inactive" ];then
-        docker swarm join --token {{ token.token1 }} 192.168.4.131:2377;
+    if [ "$(docker info | grep Swarm | sed 's/Swarm: //g')" == "active" ]; then
+        docker swarm leave;
     fi
+  args:
+    executable: /bin/bash
+
+- name: Docker swarm join worker
+  shell: docker swarm join --token {{ token.token1 }} 192.168.4.131:2377;
+

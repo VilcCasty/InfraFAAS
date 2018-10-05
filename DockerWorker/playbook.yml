@@ -7,8 +7,11 @@
     - role: Docker
     - role: OpenFaas
   tasks:
-    - name: Get swarm token on worker
-      shell: docker swarm join-token -q manager > /home/docky/token.txt
+    - name: Get swarm token for manager
+      shell: docker swarm join-token -q manager > /home/docky/tokenManager.txt
+
+    - name: Get swarm token for worker
+      shell: docker swarm join-token -q worker > /home/docky/tokenWorker.txt
 
     - name: Copy the script to convert the txt file into a yml one
       copy:
@@ -17,11 +20,17 @@
         mode: 0777
 
     - name: Execute the script
-      shell: ./convertyml.sh /home/docky/token.txt
+      shell: ./convertyml.sh /home/docky/tokenManager.txt /home/docky/tokenWorker.txt
 
     - name: Copy token to the role
       fetch: 
-        src: /home/docky/token.yml
+        src: /home/docky/tokenManager.yml
+        dest: token.yml
+        flat: yes
+
+    - name: Copy token to the role
+      fetch: 
+        src: /home/docky/tokenWorker.yml
         dest: token.yml
         flat: yes
 
