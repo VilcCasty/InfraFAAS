@@ -1,0 +1,14 @@
+---
+- include_tasks: faas-cli.yml
+
+- name: Init docker swarm
+  shell: |
+    if [ "$(docker info | grep Swarm | sed 's/Swarm: //g')" == "inactive" ]; then
+        docker swarm init;
+    fi
+  args:
+    executable: /bin/bash
+
+- include_tasks: openfaas.yml
+
+

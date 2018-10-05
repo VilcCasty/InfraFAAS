@@ -1,10 +1,11 @@
 ---
-- hosts: Docker
+- hosts: OpenFaas
   become: yes
-  become_method: su
+  become_method: sudo
   become_user: root
   roles:
     - role: Docker
+    - role: OpenFaas
   tasks:
 
 

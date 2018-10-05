@@ -1,24 +1,42 @@
 ---
-- include_tasks: setup-Debian.yml
-  when: ansible_os_family == 'Debian'
+- name: Ensure old versions of Docker are not installed.
+  package:
+    name: '{{ item }}'
+    state: absent
+  with_items:
+    - docker
+    - docker-engine
+
+- name: Ensure dependencies are installed.
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+    state: present
+
+- name: Add Docker apt key.
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+    state: present
+  register: add_repository_key
+  ignore_errors: True
+
+- name: Add Docker repository.
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution|lower }} {{ ansible_distribution_release }} stable"
+    state: present
+    update_cache: yes
 
 - name: Install Docker.
   package:
-    name: "{{ docker_package }}"
-    state: "{{ docker_package_state }}"
+    name: docker-ce
+    state: present
   notify: restart docker
 
 - name: Ensure Docker is started and enabled at boot.
   service:
     name: docker
-    state: "{{ docker_service_state }}"
-    enabled: "{{ docker_service_enabled }}"
+    state: started
+    enabled: yes
 
-- name: Ensure handlers are notified now to avoid firewall conflicts.
-  meta: flush_handlers
-
-- include_tasks: docker-compose.yml
-  when: docker_install_compose
-
-- include_tasks: docker-users.yml
-  when: docker_users

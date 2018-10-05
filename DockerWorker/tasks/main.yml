@@ -1,0 +1,14 @@
+---
+- name: Load var
+  include_vars: 
+    file: token.yml
+    name: token 
+
+- name: debug
+  debug: var=token.token1
+
+- name: Docker swarm join worker
+  shell: |
+    if [ "$(docker info | grep Swarm | sed 's/Swarm: //g')" == "inactive" ];then
+        docker swarm join --token {{ token.token1 }} 192.168.4.131:2377;
+    fi

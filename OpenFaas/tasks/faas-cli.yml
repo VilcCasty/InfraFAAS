@@ -1,0 +1,8 @@
+---
+- name: Make sure that curl is on the machine
+  apt:
+    name: curl
+    state: present
+
+- name: Install FAAS-Cli
+  shell: curl -sSL https://cli.openfaas.com | sh

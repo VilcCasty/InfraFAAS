@@ -1,0 +1,38 @@
+---
+- hosts: OpenFaas
+  become: yes
+  become_method: sudo
+  become_user: root
+  roles:
+    - role: Docker
+    - role: OpenFaas
+  tasks:
+    - name: Get swarm token on worker
+      shell: docker swarm join-token -q manager > /home/docky/token.txt
+
+    - name: Copy the script to convert the txt file into a yml one
+      copy:
+        src: convertyml.sh
+        dest: /home/docky/convertyml.sh
+        mode: 0777
+
+    - name: Execute the script
+      shell: ./convertyml.sh /home/docky/token.txt
+
+    - name: Copy token to the role
+      fetch: 
+        src: /home/docky/token.yml
+        dest: token.yml
+        flat: yes
+
+- hosts: DockerWorker
+  become: yes
+  become_method: sudo
+  become_user: root
+  roles:
+    - role: Docker
+    - role: DockerWorker
+  tasks:
+
+
+

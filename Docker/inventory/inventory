@@ -1,6 +1,0 @@
-[Docker]
-192.168.1.31
-
-[Docker:vars]
-ansible_password = FAA92142iit
-
