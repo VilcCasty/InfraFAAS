@@ -13,3 +13,5 @@ Le role OpenFaas permet l'ajout des fonctionnalités nécessaires au fonctionnem
 ## Role DockerWorker
 
 Le role DockerWorker permet l'ajout de worker au swarm par la récupération du token sur le serveur de management du swarm.
+
+## Role Kong
