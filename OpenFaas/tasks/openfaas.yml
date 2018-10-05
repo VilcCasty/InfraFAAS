@@ -1,4 +1,5 @@
 ---
+#Nettoyage du path de faas
 - name: Clean artifact path
   file:
     state: absent
@@ -10,4 +11,3 @@
 
 #- name: Save the id and password
 #  shell: 
-

@@ -1,8 +1,9 @@
 ---
+#Vérification de la présence de curl
 - name: Make sure that curl is on the machine
   apt:
     name: curl
     state: present
-
+#Téléchargement de faas-cli par curl
 - name: Install FAAS-Cli
   shell: curl -sSL https://cli.openfaas.com | sh

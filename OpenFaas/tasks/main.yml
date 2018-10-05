@@ -1,6 +1,7 @@
 ---
+#Appel au script de faas-cli
 - include_tasks: faas-cli.yml
-
+#Initialisation de docker en tant que manager si il est inactivé
 - name: Init docker swarm
   shell: |
     if [ "$(docker info | grep Swarm | sed 's/Swarm: //g')" == "inactive" ]; then
@@ -8,7 +9,5 @@
     fi
   args:
     executable: /bin/bash
-
+#Appel au script d'installation d'openfaas
 - include_tasks: openfaas.yml
-
-
