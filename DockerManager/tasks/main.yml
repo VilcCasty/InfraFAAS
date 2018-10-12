@@ -1,21 +1,22 @@
 ---
 - name: Load var
   include_vars: 
-    file: tokenWorker.yml
+    file: tokenManager.yml
     name: token 
 
 - name: debug
-  debug: var=token.token2
+  debug: var=token.token1
 
 - name: Swarm leave
   shell: |
     if [ "$(docker info | grep Swarm | sed 's/Swarm: //g')" == "active" ]; then
-       hostnameWorker=cat /etc/hostname;
+       hostnameManager=$( cat /etc/hostname );
+       docker node demote $hostnameManager;
        docker swarm leave;
     fi
   args:
     executable: /bin/bash
 
-- name: Docker swarm join worker
-  shell: docker swarm join --token {{ token.token2 }} 192.168.4.131:2377;
+- name: Docker swarm join manager
+  shell: docker swarm join --token {{ token.token1 }} 192.168.4.131:2377;
 

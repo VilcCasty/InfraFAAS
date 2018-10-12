@@ -4,6 +4,7 @@
   become_method: sudo
   become_user: root
   roles:
+    - role: DockerClean
     - role: Docker
     - role: OpenFaas
   tasks:
@@ -25,14 +26,23 @@
     - name: Copy token to the role
       fetch: 
         src: /home/docky/tokenManager.yml
-        dest: token.yml
+        dest: tokenManager.yml
         flat: yes
 
     - name: Copy token to the role
       fetch: 
         src: /home/docky/tokenWorker.yml
-        dest: token.yml
+        dest: tokenWorker.yml
         flat: yes
+
+- hosts: DockerManager
+  become: yes
+  become_method: sudo
+  become_user: root
+  roles:
+    - role: Docker
+    - role: DockerManager
+  tasks:
 
 - hosts: DockerWorker
   become: yes
@@ -43,5 +53,12 @@
     - role: DockerWorker
   tasks:
 
+- hosts: OpenFaas
+  become: yes
+  become_method: sudo
+  become_user: root
+  roles:
+    - role: DockerClean
+  tasks:
 
 

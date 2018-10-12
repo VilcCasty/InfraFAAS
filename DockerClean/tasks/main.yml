@@ -1,0 +1,15 @@
+---
+- name: Remove the down docker
+  copy:
+    src: clean.sh
+    dest: /home/docky/clean.sh
+    mode: 0777
+
+- name: Execute the script
+  shell: |
+       if [ ! -f removeNode.txt ] ; then 
+         echo bloup >> removeNode.txt
+       fi
+       ./clean.sh removeNode.txt
+  ignore_errors: yes
+
