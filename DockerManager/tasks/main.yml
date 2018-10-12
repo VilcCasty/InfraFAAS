@@ -4,9 +4,6 @@
     file: tokenManager.yml
     name: token 
 
-- name: debug
-  debug: var=token.token1
-
 - name: Swarm leave
   shell: |
     if [ "$(docker info | grep Swarm | sed 's/Swarm: //g')" == "active" ]; then

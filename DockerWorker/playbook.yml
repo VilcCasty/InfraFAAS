@@ -52,6 +52,9 @@
     - role: Docker
     - role: DockerWorker
   tasks:
+    - name: Because docker is slow
+      pause: 
+        seconds: 20
 
 - hosts: OpenFaas
   become: yes
