@@ -1,0 +1,133 @@
+---
+- name: See if kubernetes is already init
+  stat:
+    path: /etc/kubernetes/kubelet.conf
+#  register: kuber_init_status # Problem for the first run
+
+- name: Kubernetes master init
+  shell: kubeadm init --apiserver-advertise-address=192.168.4.185 --pod-network-cidr=10.10.0.0/16
+#  when: kuber_init_status == False
+
+- name: Set up to use kubectl as ansible_ssh_user (1)
+  file:
+    path: /home/{{ansible_ssh_user}}/.kube
+    state: directory
+
+- name: Set up to use kubectl as ansible_ssh_user (2)
+  shell: cp /etc/kubernetes/admin.conf /home/{{ansible_ssh_user}}/.kube/config
+
+- name: Set up to use kubectl as ansible_ssh_user (3)
+  shell: chown {{ansible_ssh_user}}:{{ansible_ssh_user}} /home/{{ansible_ssh_user}}/.kube/config
+
+- name: Delete etcd.yaml / rbac.yaml / calico.yaml
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - etcd.yaml
+    - rbac.yaml
+    - calico.yaml
+    - kubernetes-dashboard.yaml
+
+- name: Download etcd calico
+  shell: wget https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/etcd.yaml
+
+- name: Apply etcd calico
+  become: yes
+  become_user: '{{ansible_ssh_user}}'
+  shell: kubectl apply -f \etcd.yaml
+
+- name: Download rbac calico
+  shell: wget https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/rbac.yaml
+
+- name: Apply rbac calico
+  become: yes
+  become_user: '{{ansible_ssh_user}}'
+  shell: kubectl apply -f \rbac.yaml
+
+- name: Download calico
+  shell: wget https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/calico.yaml
+
+- name: Install calico
+  become: yes
+  become_user: '{{ansible_ssh_user}}'
+  shell: kubectl apply -f \calico.yaml
+
+- name: Allow node to work on master
+  become: yes
+  become_user: '{{ansible_ssh_user}}'
+  shell: kubectl taint nodes --all node-role.kubernetes.io/master-
+  ignore_errors: yes
+
+- name: Download calico
+  shell: wget https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+
+- name: Install dashboard
+  become: yes
+  become_user: '{{ansible_ssh_user}}'
+  shell: kubectl create -f kubernetes-dashboard.yaml
+  ignore_errors: yes
+
+- name: See if dashboard account is already configured
+  become: yes
+  become_user: '{{ansible_ssh_user}}'
+  shell: 'kubectl get serviceaccount dashboard -n default | grep dashboard -c'
+  register: account_status
+  ignore_errors: yes # sale mais y'a pas le choix pour l'instant
+
+- debug: msg="{{account_status.stdout}}"
+
+- name: Configure dashboard account (1)
+  become: yes
+  become_user: '{{ansible_ssh_user}}'
+  shell: kubectl create serviceaccount dashboard -n default
+  when: account_status.stdout == "0"
+ 
+- name: See if dashboard account is already configured
+  become: yes
+  become_user: '{{ansible_ssh_user}}'
+  shell: 'kubectl create clusterrolebinding dashboard-admin -n default \ --clusterrole=cluster-admin \ --serviceaccount=default:dashboard | grep dashboard-admin -c'
+  register: account_status_cluster
+  ignore_errors: yes # sale mais y'a pas le choix pour l'instant
+
+- name: Configure dashboard account (2)
+  become: yes
+  become_user: '{{ansible_ssh_user}}'
+  shell: kubectl create clusterrolebinding dashboard-admin -n default \ --clusterrole=cluster-admin \ --serviceaccount=default:dashboard
+  when: account_status_cluster.stdout == "0" #todo répararer cette merde fuck it je me casse.
+  ignore_errors: yes # sale mais y'a pas le choix pour l'instant
+
+- name: Save token (2)
+  become: yes
+  become_user: '{{ansible_ssh_user}}'
+  shell: kubectl get secret $(kubectl get serviceaccount dashboard -o jsonpath="{.secrets[0].name}") -o jsonpath="{.data.token}" | base64 --decode > token
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

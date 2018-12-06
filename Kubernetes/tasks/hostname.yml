@@ -1,0 +1,53 @@
+---
+- name: Delete hosts2
+  file:
+    path: /etc/hosts2
+    state: absent
+
+- name: Delete hostname2
+  file:
+    path: /etc/hostname2
+    state: absent
+
+- name: copy /etc/hosts
+  command: cp /etc/hosts /etc/hosts2
+
+
+- name: configure /etc/hosts2
+  lineinfile: dest=/etc/hosts2 
+              regexp='^127.0.1.1'
+              state=absent
+
+- name: configure /etc/hosts2
+  lineinfile: dest=/etc/hosts2 
+              insertafter='^127.0.0.1'
+              regexp='^'
+              line='127.0.1.1    KuberMaster-{{hostname_suffix|quote}}'
+              state=present
+  when: kubernetes_node_type == "master"
+
+- name: configure /etc/hosts2
+  lineinfile: dest=/etc/hosts2 
+              insertafter='^127.0.0.1'
+              regexp='^'
+              line='127.0.1.1    KuberWorker-{{hostname_suffix|quote}}'
+              state=present
+  when: kubernetes_node_type == "worker"
+
+- name: change the hostname to prevent duplicate
+  shell: "echo KuberMaster-{{hostname_suffix|quote}} >> /etc/hostname2"
+  when: kubernetes_node_type == "master"
+
+- name: change the hostname to prevent duplicate
+  shell: "echo KuberWorker-{{hostname_suffix|quote}} >> /etc/hostname2"
+  when: kubernetes_node_type == "worker"
+
+
+- name: copy /etc/hosts2 /etc/hostname2
+  shell: cp /etc/hosts2 /etc/hosts && cp /etc/hostname2 /etc/hostname && hostname KuberWorker-{{hostname_suffix|quote}}
+  when: kubernetes_node_type == "worker"
+
+- name: copy /etc/hosts2 /etc/hostname2
+  shell: cp /etc/hosts2 /etc/hosts && cp /etc/hostname2 /etc/hostname && hostname KuberMaster-{{hostname_suffix|quote}}
+  when: kubernetes_node_type == "master"
+

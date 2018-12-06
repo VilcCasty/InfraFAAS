@@ -5,8 +5,8 @@
     state: absent
     path: faas/
 
-#- name: Install OpenFaas
-#  shell: git clone https://github.com/openfaas/faas && \ cd faas && \ ./deploy_stack.sh
+- name: Install OpenFaas
+  shell: git clone https://github.com/openfaas/faas && \ cd faas && \ ./deploy_stack.sh
 
 
 #- name: Save the id and password

@@ -1,0 +1,5 @@
+---
+# Supported node types
+kubernetes_node_type:
+  - master
+  - worker

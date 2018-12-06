@@ -1,0 +1,55 @@
+---
+- name: Remove swapfile from /etc/fstab
+  mount:
+    name: swap
+    fstype: swap
+    state: absent
+
+- name: Disable swap
+  command: swapoff -a
+
+- include_tasks: hostname.yml
+
+- name: Install packages
+  apt:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+    - openssh-server  
+    - docker.io
+    - apt-transport-https
+    - curl
+
+- name: Prepare the install of kubernetes
+  shell: curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+
+- name: create /etc/apt/sources.list.d/kubernetes.list
+  file:
+    path: '/etc/apt/sources.list.d/kubernetes.list'
+    state: touch
+
+- name:
+  lineinfile: dest=/etc/apt/sources.list.d/kubernetes.list
+              regexp='^'
+              line='deb http://apt.kubernetes.io/ kubernetes-xenial main'
+              state=present
+
+- name: Install kubernetes packages
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+  vars:
+    packages:
+    - kubelet  
+    - kubeadm
+    - kubectl
+
+- name: configure environnement
+  lineinfile: dest=/etc/systemd/system/kubelet.service.d/10-kubeadm.conf 
+              insertbefore='^ExecStart='
+              line='Environment=”cgroup-driver=systemd/cgroup-driver=cgroupfs”'
+              state=present
+
+- include_tasks: '{{ kubernetes_node_type }}.yml'
+

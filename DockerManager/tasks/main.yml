@@ -15,5 +15,7 @@
     executable: /bin/bash
 
 - name: Docker swarm join manager
-  shell: docker swarm join --token {{ token.token1 }} 192.168.4.131:2377;
+  shell: docker swarm join --token {{ token.token1 }} 192.168.4.54:2377;
   ignore_errors: yes
+
+

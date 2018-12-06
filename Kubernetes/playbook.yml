@@ -1,0 +1,18 @@
+---
+- hosts: KuberMaster
+  become: yes
+  become_method: sudo
+  become_user: root
+  roles:
+    - role: Kubernetes
+      kubernetes_node_type: master
+  tasks:
+
+#- hosts: KuberWorker
+#  become: yes
+#  become_method: sudo
+#  become_user: root
+#  roles:
+#    - role: Kubernetes
+#      kubernetes_node_type: worker
+#  tasks:
