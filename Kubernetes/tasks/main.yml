@@ -17,7 +17,7 @@
   vars:
     packages:
     - openssh-server  
-    - docker.io
+    - docker.io #Mettre le role docker car docker.io n'est pas la bonne version
     - apt-transport-https
     - curl
 

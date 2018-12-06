@@ -5,9 +5,10 @@
     state: absent
     path: faas/
 
+#Clone du github OpenFaas, installation et enregistrement du retour de la commande pour pouvoir récupérer le login / mdp
 - name: Install OpenFaas
-  shell: git clone https://github.com/openfaas/faas && \ cd faas && \ ./deploy_stack.sh
+  shell: git clone https://github.com/openfaas/faas && \ cd faas && \ ./deploy_stack.sh > TempLogin
 
-
-#- name: Save the id and password
-#  shell: 
+#Récupération et enregistrement du login / mdp dans CredentialsOpenFaas
+- name: Save the id and password
+  shell: cat TempLogin | grep -A2 Credentials > CredentialsOpenFaas

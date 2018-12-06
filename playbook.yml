@@ -4,64 +4,64 @@
   become_method: sudo
   become_user: root
   roles:
-    - role: DockerClean
+#    - role: DockerClean
     - role: Docker
     - role: OpenFaas
   tasks:
-    - name: Get swarm token for manager
-      shell: docker swarm join-token -q manager > /home/docky/tokenManager.txt
+#    - name: Get swarm token for manager
+#      shell: docker swarm join-token -q manager > /home/docky/tokenManager.txt
 
-    - name: Get swarm token for worker
-      shell: docker swarm join-token -q worker > /home/docky/tokenWorker.txt
+#    - name: Get swarm token for worker
+#      shell: docker swarm join-token -q worker > /home/docky/tokenWorker.txt
 
-    - name: Copy the script to convert the txt file into a yml one
-      copy:
-        src: convertyml.sh
-        dest: /home/docky/convertyml.sh
-        mode: 0777
+#    - name: Copy the script to convert the txt file into a yml one
+#      copy:
+#        src: convertyml.sh
+#        dest: /home/docky/convertyml.sh
+#        mode: 0777
 
-    - name: Execute the script
-      shell: ./convertyml.sh /home/docky/tokenManager.txt /home/docky/tokenWorker.txt
+#    - name: Execute the script
+#      shell: ./convertyml.sh /home/docky/tokenManager.txt /home/docky/tokenWorker.txt
 
-    - name: Copy token to the role
-      fetch: 
-        src: /home/docky/tokenManager.yml
-        dest: tokenManager.yml
-        flat: yes
+#    - name: Copy token to the role
+#      fetch: 
+#        src: /home/docky/tokenManager.yml
+#        dest: tokenManager.yml
+#        flat: yes
 
-    - name: Copy token to the role
-      fetch: 
-        src: /home/docky/tokenWorker.yml
-        dest: tokenWorker.yml
-        flat: yes
+#    - name: Copy token to the role
+#      fetch: 
+#        src: /home/docky/tokenWorker.yml
+#        dest: tokenWorker.yml
+#        flat: yes
 
-- hosts: DockerManager
-  become: yes
-  become_method: sudo
-  become_user: root
-  roles:
-    - role: Docker
-    - role: DockerManager
-  tasks:
+#- hosts: DockerManager
+#  become: yes
+#  become_method: sudo
+#  become_user: root
+#  roles:
+#    - role: Docker
+#    - role: DockerManager
+#  tasks:
 
-- hosts: DockerWorker
-  become: yes
-  become_method: sudo
-  become_user: root
-  roles:
-    - role: Docker
-    - role: DockerWorker
-  tasks:
-    - name: Because docker is slow
-      pause: 
-        seconds: 20
+#- hosts: DockerWorker
+#  become: yes
+#  become_method: sudo
+#  become_user: root
+#  roles:
+#    - role: Docker
+#    - role: DockerWorker
+#  tasks:
+#    - name: Because docker is slow
+#      pause: 
+#        seconds: 20
 
-- hosts: OpenFaas
-  become: yes
-  become_method: sudo
-  become_user: root
-  roles:
-    - role: DockerClean
-  tasks:
+#- hosts: OpenFaas
+#  become: yes
+#  become_method: sudo
+#  become_user: root
+#  roles:
+#    - role: DockerClean
+#  tasks:
 
 

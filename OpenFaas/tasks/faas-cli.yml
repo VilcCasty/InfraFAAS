@@ -4,6 +4,7 @@
   apt:
     name: curl
     state: present
-#Téléchargement de faas-cli par curl
+
+#Téléchargement et installation de faas-cli par curl
 - name: Install FAAS-Cli
   shell: curl -sSL https://cli.openfaas.com | sh

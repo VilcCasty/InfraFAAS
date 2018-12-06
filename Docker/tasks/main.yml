@@ -1,4 +1,5 @@
 ---
+#Vérification que les veilles versions de Docker ne sont pas installé
 - name: Ensure old versions of Docker are not installed.
   package:
     name: '{{ item }}'
@@ -14,6 +15,7 @@
       - ca-certificates
     state: present
 
+#Obligé d'utilisé cette méthode car le package docker.io n'est pas à jour.
 - name: Add Docker apt key.
   apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
@@ -28,8 +30,7 @@
     state: present
     update_cache: yes
 
-
-- name: Install Docker.
+- name: Restart Docker.
   package:
     name: docker-ce
     state: present
