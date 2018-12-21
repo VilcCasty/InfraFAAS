@@ -11,4 +11,10 @@
 
 #Récupération et enregistrement du login / mdp dans CredentialsOpenFaas
 - name: Save the id and password
-  shell: cat TempLogin | grep -A2 Credentials > CredentialsOpenFaas
+  shell: cat faas/TempLogin | grep -A2 Credentials > CredentialsOpenFaas
+
+#On efface le TempLogin ayant servi pour enregistrer la commande d'installation
+- name: Delete TempLogin
+  file:
+    path: /home/{{ansible_ssh_user}}/faas/TempLogin
+    state: absent

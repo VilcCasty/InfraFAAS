@@ -1,4 +1,14 @@
 ---
+#apt install python-pip
+- name: Install pip
+  apt:
+    name: python-pip
+    state: present
+    update_cache: yes
+
+- name: Install openshift
+  shell: pip install openshift
+
 - name: See if kubernetes is already init
   stat:
     path: /etc/kubernetes/kubelet.conf
@@ -17,9 +27,15 @@
   shell: cp /etc/kubernetes/admin.conf /home/{{ansible_ssh_user}}/.kube/config
 
 - name: Set up to use kubectl as ansible_ssh_user (3)
-  shell: chown {{ansible_ssh_user}}:{{ansible_ssh_user}} /home/{{ansible_ssh_user}}/.kube/config
+  file:
+    path: /home/{{ansible_ssh_user}}/.kube/config
+    owner: '{{ansible_ssh_user}}'
+    group: '{{ansible_ssh_user}}'
 
-- name: Delete etcd.yaml / rbac.yaml / calico.yaml
+#- name: Set up to use kubectl as ansible_ssh_user (3)
+#  shell: chown {{ansible_ssh_user}}:{{ansible_ssh_user}} /home/{{ansible_ssh_user}}/.kube/config
+
+- name: Delete etcd.yaml / rbac.yaml / calico.yaml / kubernetes-dashboard.yaml
   file:
     path: "{{ item }}"
     state: absent
@@ -29,38 +45,69 @@
     - calico.yaml
     - kubernetes-dashboard.yaml
 
+#- name: Download etcd calico
+#  shell: wget https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/etcd.yaml
+
 - name: Download etcd calico
-  shell: wget https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/etcd.yaml
+  get_url:
+    url: https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/etcd.yaml
+    dest: /home/{{ansible_ssh_user}}
+    mode: 0777
+
+#- name: Apply etcd calico
+#  become: yes
+#  become_user: '{{ansible_ssh_user}}'
+#  shell: kubectl apply -f \etcd.yaml
 
 - name: Apply etcd calico
   become: yes
   become_user: '{{ansible_ssh_user}}'
-  shell: kubectl apply -f \etcd.yaml
+  k8s:
+    state: present
+    src: \etcd.yaml
+
+#- name: Download rbac calico
+#  shell: wget https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/rbac.yaml
 
 - name: Download rbac calico
-  shell: wget https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/rbac.yaml
+  get_url:
+    url: https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/rbac.yaml
+    dest: /home/{{ansible_ssh_user}}
+    mode: 0777
 
 - name: Apply rbac calico
   become: yes
   become_user: '{{ansible_ssh_user}}'
   shell: kubectl apply -f \rbac.yaml
 
+#- name: Download calico
+#  shell: wget https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/calico.yaml
+
 - name: Download calico
-  shell: wget https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/calico.yaml
+  get_url:
+    url: https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/calico.yaml
+    dest: /home/{{ansible_ssh_user}}
+    mode: 0777
 
 - name: Install calico
   become: yes
   become_user: '{{ansible_ssh_user}}'
   shell: kubectl apply -f \calico.yaml
 
-- name: Allow node to work on master
-  become: yes
-  become_user: '{{ansible_ssh_user}}'
-  shell: kubectl taint nodes --all node-role.kubernetes.io/master-
-  ignore_errors: yes
+#- name: Allow node to work on master
+#  become: yes
+#  become_user: '{{ansible_ssh_user}}'
+#  shell: kubectl taint nodes --all node-role.kubernetes.io/master-
+#  ignore_errors: yes
 
-- name: Download calico
-  shell: wget https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+#- name: Download dashboard
+#  shell: wget https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+
+- name: Download dashboard
+  get_url:
+    url: https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+    dest: /home/{{ansible_ssh_user}}
+    mode: 0777
 
 - name: Install dashboard
   become: yes
@@ -102,8 +149,15 @@
   become_user: '{{ansible_ssh_user}}'
   shell: kubectl get secret $(kubectl get serviceaccount dashboard -o jsonpath="{.secrets[0].name}") -o jsonpath="{.data.token}" | base64 --decode > token
 
-
-
+- name: Clean (Delete etcd.yaml / rbac.yaml / calico.yaml / kubernetes-dashboard.yaml)
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - etcd.yaml
+    - rbac.yaml
+    - calico.yaml
+    - kubernetes-dashboard.yaml
 
 
 
