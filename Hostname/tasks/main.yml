@@ -1,0 +1,58 @@
+---
+#On supprime les fichiers qui vont servir pour changer les hostnames
+- name: Delete hosts2
+  file:
+    path: /etc/hosts2
+    state: absent
+
+- name: Delete hostname2
+  file:
+    path: /etc/hostname2
+    state: absent
+
+#On fait une copie de /etc/hosts pour pouvoir le modifier sans avoir de timeout d'ansible
+- name: copy /etc/hosts
+  command: cp /etc/hosts /etc/hosts2
+
+#On modifie la copie en fonction du type des machines et de leurs préfixe défini dans inventory
+- name: configure /etc/hosts2
+  lineinfile: dest=/etc/hosts2 
+              regexp='^127.0.1.1'
+              state=absent
+
+- name: configure /etc/hosts2
+  lineinfile: dest=/etc/hosts2 
+              insertafter='^127.0.0.1'
+              regexp='^'
+              line='127.0.1.1    Manager-{{hostname_suffix|quote}}'
+              state=present
+  when: node_type == "manager"
+
+- name: configure /etc/hosts2
+  lineinfile: dest=/etc/hosts2 
+              insertafter='^127.0.0.1'
+              regexp='^'
+              line='127.0.1.1    Worker-{{hostname_suffix|quote}}'
+              state=present
+  when: node_type == "worker"
+
+#On fait de même pour le fichier /etc/hostname
+- name: change the hostname to prevent duplicate
+  shell: "echo Manager-{{hostname_suffix|quote}} >> /etc/hostname2"
+  when: node_type == "manager"
+
+- name: change the hostname to prevent duplicate
+  shell: "echo Worker-{{hostname_suffix|quote}} >> /etc/hostname2"
+  when: node_type == "worker"
+
+#On remplace /etc/hosts et /etc/hostname par leurs copie en même temps. De plus on fait une commande hostname afin de rentrer le hostname jusqu'au prochain démarrage, lors duquel ce sera le fichier /etc/hostname qui sera prit en compte
+- name: copy /etc/hosts2 /etc/hostname2
+  shell: cp /etc/hosts2 /etc/hosts && cp /etc/hostname2 /etc/hostname && hostname Manager-{{hostname_suffix|quote}}
+  when: node_type == "manager"
+
+- name: copy /etc/hosts2 /etc/hostname2
+  shell: cp /etc/hosts2 /etc/hosts && cp /etc/hostname2 /etc/hostname && hostname Worker-{{hostname_suffix|quote}}
+  when: node_type == "worker"
+
+
+

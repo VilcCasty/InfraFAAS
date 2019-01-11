@@ -15,7 +15,7 @@
 #  become_method: sudo
 #  become_user: root
 #  roles:
-#    - role: DOcker
+#    - role: Docker
 #    - role: Kubernetes
 #      kubernetes_node_type: worker
 #  tasks:

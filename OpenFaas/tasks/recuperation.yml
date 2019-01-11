@@ -1,0 +1,32 @@
+--- 
+#Récupération du token permettant de joindre un manager
+- name: Get swarm token for manager
+  shell: docker swarm join-token -q manager > /home/{{ansible_ssh_user}}/tokenManager.txt
+
+#Récupération du token permettant de joindre un worker
+- name: Get swarm token for worker
+  shell: docker swarm join-token -q worker > /home/{{ansible_ssh_user}}/tokenWorker.txt
+
+#On copie le script permettant de passer les tokens au format yml
+- name: Copy the script to convert the txt file into a yml one
+  copy:
+    src: convertyml.sh
+    dest: /home/{{ansible_ssh_user}}/convertyml.sh
+    mode: 0777
+
+#On passe les tokens au format yml 
+- name: Execute the script
+  shell: ./convertyml.sh /home/{{ansible_ssh_user}}/tokenManager.txt /home/{{ansible_ssh_user}}/tokenWorker.txt
+
+#On copie les tokens hors du serveur
+- name: Copy token to the role
+  fetch: 
+    src: /home/{{ansible_ssh_user}}/tokenManager.yml
+    dest: tokenManager.yml
+    flat: yes
+
+- name: Copy token to the role
+  fetch: 
+    src: /home/{{ansible_ssh_user}}/tokenWorker.yml
+    dest: tokenWorker.yml
+    flat: yes

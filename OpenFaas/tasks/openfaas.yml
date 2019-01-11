@@ -1,20 +1,33 @@
 ---
 #Nettoyage du path de faas
-- name: Clean artifact path
+- name: Clean faas path
   file:
     state: absent
     path: faas/
 
 #Clone du github OpenFaas, installation et enregistrement du retour de la commande pour pouvoir récupérer le login / mdp
-- name: Install OpenFaas
+- name: Download and install OpenFaas
   shell: git clone https://github.com/openfaas/faas && \ cd faas && \ ./deploy_stack.sh > TempLogin
 
 #Récupération et enregistrement du login / mdp dans CredentialsOpenFaas
-- name: Save the id and password
+- name: Save id and password
   shell: cat faas/TempLogin | grep -A2 Credentials > CredentialsOpenFaas
+
+#Récupération du login / mdp 
+- name: Copy token to the role
+  fetch: 
+    src: /home/{{ansible_ssh_user}}/CredentialsOpenFaas
+    dest: CredentialsOpenFaas
+    flat: yes
 
 #On efface le TempLogin ayant servi pour enregistrer la commande d'installation
 - name: Delete TempLogin
   file:
     path: /home/{{ansible_ssh_user}}/faas/TempLogin
+    state: absent
+
+#On efface CredentialsOpenFaas sur le serveur
+- name: Delete CredentialsOpenFaas
+  file:
+    path: /home/{{ansible_ssh_user}}/CredentialsOpenFaas
     state: absent

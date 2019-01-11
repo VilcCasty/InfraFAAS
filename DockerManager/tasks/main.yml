@@ -1,9 +1,11 @@
 ---
+#On récupère le tocken pour ajouter le manager
 - name: Load var
   include_vars: 
     file: tokenManager.yml
     name: token 
 
+#On quitte le swarm si on est déja dans un swarm
 - name: Swarm leave
   shell: |
     if [ "$(docker info | grep Swarm | sed 's/Swarm: //g')" == "active" ]; then
@@ -14,8 +16,9 @@
   args:
     executable: /bin/bash
 
+#On rejoint le swarm voulu en tant que manager
 - name: Docker swarm join manager
-  shell: docker swarm join --token {{ token.token1 }} 192.168.4.54:2377;
+  shell: docker swarm join --token {{ token.token1 }} {{ listen_adress_swarm }}:2377;
   ignore_errors: yes
 
 

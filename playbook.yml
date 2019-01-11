@@ -1,67 +1,59 @@
 ---
+#Configuration des machines selon les rôles suivant:
+#Role Hostname: Changement de l'hostname pour être sur d'avoir un hostname unique. node-type permet d'avoir une distinction dans le nom entre manager et worker
+#Role DockerClean: Permet de remettre à 0 le réseau docker swarm
+#Role Docker: Permet d'installer les packets docker
+#Role OpenFaas: Permet d'installer OpenFaas
+#Role DockerManager: Permet de configurer un manager à ajouter sur le swarm
+#Role DockerWorker: Permet de configurer un worker à ajouter sur le swarm
+
+#Important:
+#Il faut sauvegarder les credentials d'OpenFaas avant de relancer le playbook sinon ils seront écrasés par un message d'erreur indiquant qu'ils existent déja
 - hosts: OpenFaas
   become: yes
   become_method: sudo
   become_user: root
   roles:
-#    - role: DockerClean
+    - role: Hostname
+      node_type: manager
+    - role: DockerClean
     - role: Docker
     - role: OpenFaas
   tasks:
-#    - name: Get swarm token for manager
-#      shell: docker swarm join-token -q manager > /home/docky/tokenManager.txt
 
-#    - name: Get swarm token for worker
-#      shell: docker swarm join-token -q worker > /home/docky/tokenWorker.txt
+- hosts: DockerManager
+  become: yes
+  become_method: sudo
+  become_user: root
+  roles:
+    - role: Hostname
+      node_type: manager
+    - role: Docker
+    - role: DockerManager
+  tasks:
 
-#    - name: Copy the script to convert the txt file into a yml one
-#      copy:
-#        src: convertyml.sh
-#        dest: /home/docky/convertyml.sh
-#        mode: 0777
+- hosts: DockerWorker
+  become: yes
+  become_method: sudo
+  become_user: root
+  roles:
+    - role: Hostname
+      node_type: worker
+    - role: Docker
+    - role: DockerWorker
+  tasks:
+#On doit attendre le temps que le réseau docker se reconfigure pour pouvoir repasser le role DockerClean
+    - name: Because docker is slow
+      pause: 
+        seconds: 20
 
-#    - name: Execute the script
-#      shell: ./convertyml.sh /home/docky/tokenManager.txt /home/docky/tokenWorker.txt
-
-#    - name: Copy token to the role
-#      fetch: 
-#        src: /home/docky/tokenManager.yml
-#        dest: tokenManager.yml
-#        flat: yes
-
-#    - name: Copy token to the role
-#      fetch: 
-#        src: /home/docky/tokenWorker.yml
-#        dest: tokenWorker.yml
-#        flat: yes
-
-#- hosts: DockerManager
-#  become: yes
-#  become_method: sudo
-#  become_user: root
-#  roles:
-#    - role: Docker
-#    - role: DockerManager
-#  tasks:
-
-#- hosts: DockerWorker
-#  become: yes
-#  become_method: sudo
-#  become_user: root
-#  roles:
-#    - role: Docker
-#    - role: DockerWorker
-#  tasks:
-#    - name: Because docker is slow
-#      pause: 
-#        seconds: 20
-
-#- hosts: OpenFaas
-#  become: yes
-#  become_method: sudo
-#  become_user: root
-#  roles:
-#    - role: DockerClean
-#  tasks:
+#On repasse le role DockerClean pour pouvoir enlever les artéfacts restant des workers ou manager qui ont été enlevé du swarm 
+- hosts: OpenFaas
+  become: yes
+  become_method: sudo
+  become_user: root
+  roles:
+    - role: DockerClean
+  tasks:
 
 

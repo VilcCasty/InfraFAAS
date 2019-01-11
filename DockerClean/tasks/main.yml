@@ -1,8 +1,9 @@
 ---
-- name: Remove the down docker
+#On remet à 0 le réseau docker swarm (node)
+- name: On charge le script de clean
   copy:
     src: clean.sh
-    dest: /home/docky/clean.sh
+    dest: /home/{{ansible_ssh_user}}/clean.sh
     mode: 0777
 
 - name: Execute the script

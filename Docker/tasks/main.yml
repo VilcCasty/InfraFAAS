@@ -15,7 +15,7 @@
       - ca-certificates
     state: present
 
-#Obligé d'utilisé cette méthode car le package docker.io n'est pas à jour.
+#Obligé d'utilisé cette méthode car le package docker.io n'est pas assez récent pour OpenFAAS.
 - name: Add Docker apt key.
   apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
@@ -30,7 +30,7 @@
     state: present
     update_cache: yes
 
-- name: Restart Docker.
+- name: Install Docker.
   package:
     name: docker-ce
     state: present

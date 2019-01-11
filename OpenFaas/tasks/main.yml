@@ -1,5 +1,5 @@
 ---
-#Appel au script de faas-cli
+#Installation du faas-cli
 - include_tasks: faas-cli.yml
 
 #Initialisation de docker en tant que manager si il est inactivé
@@ -11,5 +11,8 @@
   args:
     executable: /bin/bash
 
-#Appel au script d'installation d'openfaas
+#Installation d'openfaas
 - include_tasks: openfaas.yml
+
+#Récupération des tockens permettant de joindre le swarm
+- include_tasks: recuperation.yml

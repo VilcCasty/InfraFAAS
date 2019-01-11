@@ -1,9 +1,11 @@
 ---
+#On récupère le tocken pour ajouter le worker
 - name: Load var
   include_vars: 
     file: tokenWorker.yml
     name: token 
 
+#On quitte le swarm si on est déja dans un swarm
 - name: Swarm leave
   shell: |
     if [ "$(docker info | grep Swarm | sed 's/Swarm: //g')" == "active" ]; then
@@ -13,6 +15,7 @@
   args:
     executable: /bin/bash
 
+#On rejoint le swarm voulu en tant que worker
 - name: Docker swarm join worker
-  shell: docker swarm join --token {{ token.token2 }} 192.168.4.131:2377;
+  shell: docker swarm join --token {{ token.token2 }} {{ listen_adress_swarm }}:2377;
 

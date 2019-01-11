@@ -64,7 +64,7 @@
   become_user: '{{ansible_ssh_user}}'
   k8s:
     state: present
-    src: \etcd.yaml
+    src: etcd.yaml
 
 #- name: Download rbac calico
 #  shell: wget https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/rbac.yaml
@@ -75,10 +75,17 @@
     dest: /home/{{ansible_ssh_user}}
     mode: 0777
 
+#- name: Apply rbac calico
+#  become: yes
+#  become_user: '{{ansible_ssh_user}}'
+#  shell: kubectl apply -f \rbac.yaml
+
 - name: Apply rbac calico
   become: yes
   become_user: '{{ansible_ssh_user}}'
-  shell: kubectl apply -f \rbac.yaml
+  k8s:
+    state: present
+    src: rbac.yaml
 
 #- name: Download calico
 #  shell: wget https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/calico.yaml
