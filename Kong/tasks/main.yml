@@ -1,0 +1,5 @@
+---
+- include: package.yml
+- include: kong.yml
+- include: postgresql.yml
+- include: lienCurl.yml

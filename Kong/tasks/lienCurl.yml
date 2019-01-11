@@ -1,0 +1,32 @@
+---
+
+
+#Execution de commande Curl permettant les configurations de lien entre les fonctions du faas et de koog
+- name: Curl1
+  shell: |
+    curl -i -X POST --url http://127.0.0.1:8001/services/ --data 'name=openfaas-eseo' --data 'url=http://192.168.4.54:8080/function/'
+- name: Curl2
+  shell: |
+    curl -i -X POST --url http://127.0.0.1:8001/services/openfaas-eseo/routes --data 'name=default-faas-gw' --data 'paths[]=/fonctions-eseo'
+- name: Curl3
+  shell: |
+    curl -i -X GET --url http://127.0.0.1:8000/fonctions-eseo/cows
+- name: Curl4
+  shell: |
+    curl -X POST http://127.0.0.1:8001/routes/default-faas-gw/plugins \
+    --data "name=ldap-auth"  \
+    --data "config.hide_credentials=true" \
+    --data "config.ldap_host=127.0.0.1" \
+    --data "config.ldap_port=389" \
+    --data "config.start_tls=false" \
+    --data "config.base_dn=ou=Etudiants,dc=faas,dc=eseo,dc=fr" \
+    --data "config.verify_ldap_host=false" \
+    --data "config.attribute=uid" \
+    --data "config.cache_ttl=60" \
+    --data "config.header_type=ldap"
+- name: Curl5
+  shell: |
+    curl -i -X POST http://127.0.0.1:8001/routes/default-faas-gw/plugins --data "name=cors" --data "config.origins=*" 
+- name: Curl6
+  shell: |
+    curl -i -X POST http://127.0.0.1:8001/routes/default-faas-gw/plugins --data "name=file-log" --data "config.path=/tmp/request.file.log"  

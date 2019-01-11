@@ -1,0 +1,24 @@
+---
+
+#Installation des packages nécessaires aux configuration durant le script
+- name: Installation des différents packages utiles
+  apt:
+    name: "{{ packages }}"
+  vars:
+    packages:
+      - openssl
+      - libpcre3
+      - procps
+      - perl
+      - apt-transport-https
+      - curl
+
+#Installation de postgresql
+- name: Installation de postgresql
+  apt:
+    name: "{{ packages }}"
+  vars:
+    packages:
+      - postgresql
+      - phppgadmin
+      - python-psycopg2

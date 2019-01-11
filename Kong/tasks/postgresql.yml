@@ -1,0 +1,46 @@
+---
+
+#Lien de kong à postgresql
+- name: Changement du nom de fichier et des configuration de kong
+  shell: |
+    cp /etc/kong/kong.conf.default /etc/kong/kong.conf
+    sed -i -e "s/\#database\ \=\ postgres/database\ \=\ postgres/" /etc/kong/kong.conf
+    sed -i -e "s/\#pg\_password\ \=\ /pg\_password\ \=\ kong/" /etc/kong/kong.conf
+
+#Ajout d'un utilisateur kong dans la base de donnée postgresql
+- name: Ajout de l'utilisateur Kong
+  become: yes
+  become_method: sudo
+  become_user: postgres
+  postgresql_user:
+    name: kong
+    password: kong
+#Ajout d'une base de donnée pour l'adminstration de kong
+- name: Ajout de la base de donnée
+  become: yes
+  become_method: sudo
+  become_user: postgres
+  postgresql_db:
+    name: kong
+    owner: kong
+
+#Changement des configurations d'accès. Phppgadmin + postgresql
+- name: Changement des configurations Postgresql + phppgadmin
+  become: yes
+  become_method: sudo
+  become_user: root
+  shell: |
+    sed -i -e "s/Require\ local/Require\ all\ granted/" /etc/apache2/conf-available/phppgadmin.conf
+    sed -i -e "s/\#listen\_addresses\ \=\ \'localhost\'/listen\_addresses\ \=\ \'\*'/" /etc/postgresql/10/main/postgresql.conf
+    echo "host    all             all              0.0.0.0/0                       md5" >> /etc/postgresql/10/main/pg_hba.conf
+#Prise en compte des configurations précedentes
+- name: Rechargement des parametres
+  service: 
+    name: postgresql
+    state: restarted
+#Mise à jour des nouvelles configurations de kong et restart. (dans le cas de notre script, kong ne devrait pas être encore démarré mais dans le cas d'un redéployement, des artéfactes peuvent subsister)
+- name: Migration de kong
+  shell: |
+    kong migrations bootstrap
+    kong migrations up
+    kong restart
