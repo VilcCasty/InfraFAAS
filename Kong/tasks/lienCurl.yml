@@ -30,3 +30,6 @@
 - name: Curl6
   shell: |
     curl -i -X POST http://127.0.0.1:8001/routes/default-faas-gw/plugins --data "name=file-log" --data "config.path=/tmp/request.file.log"  
+- name: Curl7
+  shell: |
+     curl -i -X POST http://127.0.0.1:8001/routes/default-faas-gw/plugins --data "name=cors" --data "config.origins=*" --data "config.headers=Content-Type, Authorization" --data "config.exposed_headers=Authorization,Content-Type" 
