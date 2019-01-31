@@ -1,0 +1,47 @@
+#Explication variables:
+#ansible_ssh_user: Utilisateur ssh servant pour la connexion
+#ansible_ssh_private_key_file: clef ssh pour la connexion sur la vm. Peut être remplacé par un MDP avec la variable ansible_ssh_pass
+#ansible_become_pass: MDP pour le changement d'utilisateur par l'utilisation de become
+#listen_adress_swarm: correspond à l'IP de la machine OpenFAAS
+
+
+#La machine sur laquelle OpenFaas va être installé. Elle va aussi être le leader de deocker swarm
+#Cette machine est unique
+#Format: IP_machine hostname_suffix=OpenFAAS
+
+[OpenFaas]
+192.168.4.131 hostname_suffix=OpenFAAS
+
+[OpenFaas:vars]
+ansible_ssh_user=docky
+ansible_ssh_private_key_file=/home/vincent/.ssh/id_rsa
+ansible_become_pass=network
+
+
+#Les machines servant de manager au swarm
+#De 0 à X machines (La machine hôte OpenFAAS sert de manager)
+#Format: IP_machine hostname_suffix=X (X servant à différentier les machines avec des hostnames)
+
+[DockerManager]
+192.168.4.114 hostname_suffix=1
+
+[DockerManager:vars]
+ansible_ssh_user=docky
+ansible_ssh_private_key_file=/home/vincent/.ssh/id_rsa
+ansible_become_pass=network
+listen_adress_swarm=192.168.4.131
+
+
+#Les machines servant de worker au swarm
+#De 0 à X machines (La machine hôte OpenFAAS pouvant servir de worker s'il n'y a pas d'autre manager ni worker)
+#Format: IP_machine hostname_suffix=X (X servant à différentier les machines avec des hostnames)
+
+[DockerWorker]
+192.168.4.113 hostname_suffix=1
+
+[DockerWorker:vars]
+ansible_ssh_user=docky
+ansible_ssh_private_key_file=/home/vincent/.ssh/id_rsa
+ansible_become_pass=network
+listen_adress_swarm=192.168.4.131
+
