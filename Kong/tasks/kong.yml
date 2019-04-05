@@ -3,7 +3,7 @@
 #Ajout du dépot pour kong. Le package n'est pas installable par apt directement
 - name: Ajout des répertoires de Kong
   apt_repository:
-    repo: deb [trusted=yes] https://kong.bintray.com/kong-community-edition-deb stretch main
+    repo: deb [trusted=yes] https://kong.bintray.com/kong-deb stretch main
     state: present
 #Equivalent "apt install kong-community-edition --allow-unauthenticated"
 - name: Installation de kong-community-edition
@@ -12,4 +12,4 @@
     allow_unauthenticated: yes
   vars:
     packages:
-      - kong-community-edition
+      - kong
